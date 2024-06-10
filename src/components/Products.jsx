@@ -13,8 +13,8 @@ const Products = () => {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-center">Product Dashboard</h1>
-      <div className="products w-[90vw] m-auto flex flex-wrap gap-6 justify-center mt-6">
+      <h1 className="text-2xl font-bold text-center my-3">Product Dashboard</h1>
+      <div className="products w-[90vw] m-auto flex flex-wrap gap-6 justify-center mt-3">
         { products.length === 0 ? 'loading...' : products.map((item) => {
           const added = cart.filter((product) => product.id === item.id);
           return (
