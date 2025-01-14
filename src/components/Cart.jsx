@@ -12,6 +12,7 @@ const Cart = () => {
   const payment = useSelector(getTotalPayment);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [payloading, setPayloading] = useState(false);
   const { user,isLoggedIn,getCart, addQuantity, subQuantity, removeFromCart } = useFirebase();
 
 
@@ -50,9 +51,9 @@ const Cart = () => {
   };
 
   const makePayment = async () => {
-    setLoading(true);
-    const stripe = await loadStripe("pk_test_51Qfg9OCDYJoGIGqN2ZVg8KFIiUr0vSIUXXEcunbz0HrACB8lH8bcMB7U9q1NsLVHG5zj407EZFToFIaQnXR8RBt000wophKg6W");
-    const response = await fetch("http://localhost:3000/checkout", {
+    setPayloading(true)
+    const stripe = await loadStripe(`${import.meta.env.VITE_STRIPE_PUBLIC_KEY}`);
+    const response = await fetch(`${import.meta.env.VITE_URL}/checkout`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -68,13 +69,14 @@ const Cart = () => {
     if (session.error) {
       console.error(result.error.message);
     }
-    setLoading(false);
+    setPayloading(false);
   };
 
   if(user && reduxCart.length && reduxCart[0].user !== user?.uid) return <div className="text-center mt-3">Loading...</div>
 
   return (
     <div className="products w-[90vw] m-auto flex flex-col items-center gap-6 mt-6">
+      <h1 className="text-xl text-center font-bold underline">Your Cart</h1>
       <div className="flex justify-around flex-wrap gap-6 w-full">
         {!reduxCart ? 'loading...' : !reduxCart.length>0 ? 'No products found....' : reduxCart.map((item) => (
           <div
@@ -118,7 +120,7 @@ const Cart = () => {
         disabled={payment === 0}
         onClick={makePayment}
       >
-       {loading?<img src="src/assets/load.svg" alt="loading"/>:`Pay ${payment}$`} 
+       {payloading?<img src="src/assets/load.svg" alt="loading"/>:`Pay ${payment}$`} 
       </button>
     </div>
   );

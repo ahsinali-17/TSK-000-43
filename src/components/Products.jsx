@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setCart, addItem } from "../redux-toolkit/slices/CartSlice";
 import { fetchProducts,incPage, decPage } from "../redux-toolkit/slices/ProductSlice";
 import { displayProducts } from "../redux-toolkit/selectors/cartSelectors";
+import { setLoad } from "../redux-toolkit/slices/ProductSlice";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useFirebase } from "../firebase/Firebase";
@@ -13,11 +14,12 @@ const Products = () => {
   const { user, addToCart, emptyCart } = useFirebase();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [loading, setLoading] = useState(false);
+  const [searchParams, setSearchparams] = useSearchParams();
+  const [loading, setLoading] = useState(null);
   const cart = useSelector((state) => state.cart);
   const pageProducts = useSelector(displayProducts);
   const page = useSelector((state) => state.products.page);
+  const payLoading = useSelector((state) => state.products.loading);
   const fetchData = async () => {
     const response = await fetch("https://fakestoreapi.com/products");
     const data = await response.json();
@@ -28,7 +30,10 @@ const Products = () => {
     if (pageProducts?.length === 0) fetchData();
     const paySuccess = async () => {
       if (searchParams.get("success")) {
-        
+        dispatch(setLoad(true));
+        await emptyCart(cart[0].user);
+        dispatch(setCart([]));
+        dispatch(setLoad(false));
         toast.success("Payment Successful...", {
           position: "top-right",
           autoClose: 5000,
@@ -39,8 +44,7 @@ const Products = () => {
           progress: undefined,
           theme: "dark",
         });
-        await emptyCart(user.uid);
-        dispatch(setCart([]));
+        setSearchparams("");
       }
 
       if (searchParams.get("cancelled")) {
@@ -54,10 +58,13 @@ const Products = () => {
           progress: undefined,
           theme: "dark",
         });
+        setSearchparams("");
       }
     };
     paySuccess();
   }, []);
+
+  if (payLoading) return <div className="text-lg text-center">Loading...</div>;
 
   return (
     <>
@@ -105,7 +112,7 @@ const Products = () => {
                                   user: user.uid,
                                 })
                               )
-                          ).finally(() => setLoading(false))
+                          ).finally(() => setLoading(null))
                         : navigate("/login")
                     }}
                   >

@@ -117,7 +117,6 @@ const signupWithUsernameAndPassword = (email, pass) => {
   return (
     <FirebaseContext.Provider
     value={{
-        user,
         signupWithUsernameAndPassword,
         loginWithUsernameAndPassword,
         logout,

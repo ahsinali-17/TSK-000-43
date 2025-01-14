@@ -1,8 +1,8 @@
 const express = require('express');
 const cors = require('cors');
-const stripe = require('stripe')(`sk_test_51Qfg9OCDYJoGIGqNmHcIajefwRQAMTv9e3vW4AmNz19An0udYs3iYDSR6gWUQZkYo4autroUthsZFBdPvT97UPja00VRIEbz4I`);
-const app = express();
 require('dotenv').config();
+const app = express();
+const stripe = require('stripe')(`${process.env.STRIPE_SECRET}`);
 
 app.use(express.json());
 app.use(cors());
@@ -30,8 +30,8 @@ app.post('/checkout', async (req, res) => {
             payment_method_types: ['card'],
             line_items,
             mode: 'payment',
-            success_url: `http://localhost:5173/?success=true`,
-            cancel_url: `http://localhost:5173/?canceled=true`,
+            success_url: `${process.env.CLIENT_URL}/?success=true`,
+            cancel_url: `${process.env.CLIENT_URL}/?canceled=true`,
         });
 
         res.json({ id: session.id }); //send the session id to the client

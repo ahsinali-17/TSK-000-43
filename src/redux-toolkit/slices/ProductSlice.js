@@ -4,7 +4,8 @@ import { createSlice } from '@reduxjs/toolkit'
     name: 'products',
     initialState: {
       data: [],
-      page:0
+      page:0,
+      loading: false,
     },
     reducers: {
       fetchProducts: (state,action) => {
@@ -20,11 +21,14 @@ import { createSlice } from '@reduxjs/toolkit'
         state.page -= 1
       else return state 
       },
+      setLoad: (state,action) => {
+        state.loading = action.payload
+      },
     },
   })
   
   
-  export const { fetchProducts, incPage, decPage } = productSlice.actions
+  export const { fetchProducts, incPage, decPage, setLoad } = productSlice.actions
   
   export default productSlice.reducer 
   
