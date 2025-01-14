@@ -1,0 +1,17 @@
+<svg width="20" height="20" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="blue">
+  <circle cx="25" cy="25" r="20" stroke-width="4" stroke-linecap="round" stroke-dasharray="125.6" stroke-dashoffset="0">
+    <animateTransform 
+        attributeName="transform"
+        type="rotate"
+        from="0 25 25"
+        to="360 25 25"
+        dur="0.5s"
+        repeatCount="indefinite" />
+    <animate 
+        attributeName="stroke-dashoffset"
+        values="0;125.6"
+        dur="1s"
+        repeatCount="indefinite" />
+  </circle>
+</svg>
+

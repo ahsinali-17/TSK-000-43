@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Navbar from './components/Navbar'
 import Products from './components/Products'
 import Cart from './components/Cart'
+import Login from './components/Login'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import './App.css'
 
@@ -10,6 +11,10 @@ function App() {
     {
       path: '/',
       element:<><Navbar/>   <Products /></>
+    },
+    {
+      path: '/login',
+      element: <><Navbar/> <Login /></>
     },
     {
       path: '/cart',

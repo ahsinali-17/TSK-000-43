@@ -1,49 +1,137 @@
-import React, { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { add } from "../redux-toolkit/slices/CartSlice";
-import { getProducts } from "../redux-toolkit/slices/ProductSlice";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setCart, addItem } from "../redux-toolkit/slices/CartSlice";
+import { fetchProducts,incPage, decPage } from "../redux-toolkit/slices/ProductSlice";
+import { displayProducts } from "../redux-toolkit/selectors/cartSelectors";
+import { useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useFirebase } from "../firebase/Firebase";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 const Products = () => {
+  const { user, addToCart, emptyCart } = useFirebase();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [loading, setLoading] = useState(false);
   const cart = useSelector((state) => state.cart);
-  const products = useSelector((state) => state.products.data);
-  
+  const pageProducts = useSelector(displayProducts);
+  const page = useSelector((state) => state.products.page);
+  const fetchData = async () => {
+    const response = await fetch("https://fakestoreapi.com/products");
+    const data = await response.json();
+    dispatch(fetchProducts(data));
+  };
+
   useEffect(() => {
-    dispatch(getProducts());
+    if (pageProducts?.length === 0) fetchData();
+    const paySuccess = async () => {
+      if (searchParams.get("success")) {
+        
+        toast.success("Payment Successful...", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
+        await emptyCart(user.uid);
+        dispatch(setCart([]));
+      }
+
+      if (searchParams.get("cancelled")) {
+        toast.success("Payment Failed...", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
+      }
+    };
+    paySuccess();
   }, []);
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-center my-3">Product Dashboard</h1>
+    <>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
       <div className="products w-[90vw] m-auto flex flex-wrap gap-6 justify-center mt-3">
-        { products.length === 0 ? 'loading...' : products.map((item) => {
-          const added = cart.filter((product) => product.id === item.id);
-          return (
-            <div
-              key={item.id}
-              className="flex flex-col gap-3 items-center w-[45%] lg:w-1/4 h-[45vh] lg:h-[53vh] border border-black rounded-xl p-6 cursor-pointer shadow-lg hover:shadow-gray-500"
-            >
-              <img src={`${item.image}`} className="w-24 h-32"></img>
-              <h1 className="text-md font-semibold text-center">
-                {item.title.slice(0, 30)}
-              </h1>
-              <span className="font-semibold text-lg">{item.price} $</span>
-              <button disabled={added.length !== 0?true:false}
-                className={`${added.length !== 0
-                  ? "bg-green-500"
-                  : "bg-black"} text-md text-white p-2 rounded-2xl cursor-pointer hover:text-gray-500`} 
-                onClick={() => {
-                  dispatch(add(item));
-                }}
+        {pageProducts?.length === 0
+          ? "loading..."
+          : pageProducts?.map((item) => {
+              const added = cart?.some((product) => product.id === item.id);
+              return (
+                <div
+                  key={item.id}
+                  className="flex flex-col gap-3 items-center w-[45%] lg:w-1/4 min-h-fit border border-black rounded-xl p-6 cursor-pointer shadow-lg hover:shadow-gray-500"
+                >
+                  <img src={item.image} className="w-24 h-32" alt="product" />
+                  <h1 className="text-md font-semibold text-center">
+                    {item.title}
+                  </h1>
+                  <span className="font-semibold text-lg">{item.price} $</span>
+                  <button
+                    disabled={added}
+                    className={`${
+                      added ? "bg-green-500" : "bg-black"
+                    } text-md text-white p-2 rounded-2xl`}
+                    onClick={() =>{
+                      setLoading(item.id);
+                      user
+                        ? addToCart(user.uid, { ...item, quantity: 1 }).then(
+                            () =>
+                              dispatch(
+                                addItem({
+                                  ...item,
+                                  quantity: 1,
+                                  user: user.uid,
+                                })
+                              )
+                          ).finally(() => setLoading(false))
+                        : navigate("/login")
+                    }}
+                  >
+                    {loading === item.id?<img src="src/assets/load.svg" alt="adding..."/> :added ? "Added to Cart" : "Add to Cart"}
+                  </button>
+                </div>
+              );
+            })}
+            <div className="buttons flex justify-around w-full my-3">
+              <button
+                className="bg-blue-500 text-md text-white p-2 rounded-2xl w-24 disabled:bg-gray-500"
+                disabled={page === 0}
+                onClick={() => dispatch(decPage())}
               >
-                {added.length !== 0
-                  ? "Added to Cart"
-                  : "Add to Cart"}
+                Prev
+              </button>
+              <button
+                className="bg-blue-500 text-md text-white p-2 rounded-2xl w-24 disabled:bg-gray-500"
+                onClick={() => dispatch(incPage())}
+                disabled={page*6>=pageProducts.length}
+              >
+                Next
               </button>
             </div>
-          );
-        })}
       </div>
-    </div>
+    </>
   );
 };
 
