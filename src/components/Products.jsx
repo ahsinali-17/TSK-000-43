@@ -116,7 +116,7 @@ const Products = () => {
                         : navigate("/login")
                     }}
                   >
-                    {loading === item.id?<img src="src/assets/load.svg" alt="adding..."/> :added ? "Added to Cart" : "Add to Cart"}
+                    {loading === item.id?<img src="/assets/load.svg" alt="adding..."/> :added ? "Added to Cart" : "Add to Cart"}
                   </button>
                 </div>
               );

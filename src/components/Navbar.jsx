@@ -24,7 +24,7 @@ export default function Navbar() {
         {user && user !== undefined ? (
           <div className="flex items-center gap-3">
             <Link to="/cart" className="flex items-center p-2 relative">
-              <img src="src/assets/cart.svg" alt="cart" />
+              <img src="/assets/cart.svg" alt="cart" />
               {(cartCount > 0 && !loading) && (
                 <span className="text-white bg-red-500 rounded-full w-6 h-6 flex items-center justify-center text-sm absolute -top-2 -right-2">
                   {cartCount}

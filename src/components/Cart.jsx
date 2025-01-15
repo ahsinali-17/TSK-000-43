@@ -11,7 +11,7 @@ const Cart = () => {
   const reduxCart = useSelector((state) => state.cart);
   const payment = useSelector(getTotalPayment);
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(null);
   const [payloading, setPayloading] = useState(false);
   const { user,isLoggedIn,getCart, addQuantity, subQuantity, removeFromCart } = useFirebase();
 
@@ -37,17 +37,17 @@ const Cart = () => {
   };
 
   const handleAddQuantity = async (item) => {
-    setLoading(true);
+    setLoading(item.id);
     await addQuantity(user.uid, item);
     dispatch(incrementQuantity(item));
-    setLoading(false);
+    setLoading(null);
   };
 
   const handleSubQuantity = async (item) => {
-    setLoading(true);
+    setLoading(item.id);
     await subQuantity(user.uid, item);
     dispatch(decrementQuantity(item));
-    setLoading(false);
+    setLoading(null);
   };
 
   const makePayment = async () => {
@@ -102,7 +102,7 @@ const Cart = () => {
                 >
                   +
                 </button>
-                {loading?<img src="src/assets/load.svg" alt="..."/>:`Quantity: ${item.quantity || 1}`}
+                {loading === item.id?<img src="/assets/load.svg" alt="..."/>:`Quantity: ${item.quantity || 1}`}
                 <button
                   className="hover:text-red-500 font-bold cursor-pointer w-6 h-full rounded-r-2xl disabled:cursor-default disabled:hover:text-white"
                   disabled={item.quantity === 1}
@@ -120,7 +120,7 @@ const Cart = () => {
         disabled={payment === 0}
         onClick={makePayment}
       >
-       {payloading?<img src="src/assets/load.svg" alt="loading"/>:`Pay ${payment}$`} 
+       {payloading?<img src="/assets/load.svg" alt="loading"/>:`Pay ${payment}$`} 
       </button>
     </div>
   );
